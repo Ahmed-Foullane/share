@@ -10,6 +10,7 @@ import net.ahmed.youshar.auth.service.AuthenticationService;
 import net.ahmed.youshar.auth.service.JwtService;
 import net.ahmed.youshar.user.DTO.LoginUserDto;
 import net.ahmed.youshar.user.DTO.RegisterUserDto;
+import net.ahmed.youshar.utils.ResponseMessage;
 import net.ahmed.youshar.utils.Validation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -70,9 +71,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody RefreshTokenDto refreshTokenDto) {
+    public ResponseEntity<?> logout(@RequestBody RefreshTokenDto refreshTokenDto) {
         authenticationService.logout(refreshTokenDto.getRefreshToken());
-        return ResponseEntity.ok().build();
+        ResponseMessage responseMessage = new ResponseMessage(200, "you log out successfully");
+        return ResponseEntity.ok(responseMessage);
     }
 
 

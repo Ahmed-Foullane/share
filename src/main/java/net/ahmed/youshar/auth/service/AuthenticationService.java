@@ -40,6 +40,8 @@ public class AuthenticationService {
             throw new EmailAlreadyRegisteredException(input.email());
         }
 
+
+
         AppUser user = AppUser.builder()
                 .firstName(input.firstName())
                 .lastName(input.lastName())
