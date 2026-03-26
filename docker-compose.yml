@@ -1,0 +1,81 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: youshare-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-YouShareDB}
+      MYSQL_USER: ${MYSQL_USER:-ahmed}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    ports:
+      - "${PHPMYADMIN_PORT:-8089}:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      PMA_ARBITRARY: "1"
+      UPLOAD_LIMIT: 1024M
+      MEMORY_LIMIT: 1024M
+      MAX_EXECUTION_TIME: "300"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mynetwork
+
+  app:
+    build:
+      context: ./youShar
+      dockerfile: Dockerfile
+    container_name: youshare-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      SERVER_PORT: "8080"
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-YouShareDB}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-ahmed}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-password}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mynetwork
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: youshare-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:80"
+    depends_on:
+      - app
+    networks:
+      - mynetwork
+
+volumes:
+  db_data:
+
+networks:
+  mynetwork:
+    driver: bridge
