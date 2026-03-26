@@ -10,7 +10,9 @@ import net.ahmed.youshar.auth.repository.RefreshTokenRepository;
 import net.ahmed.youshar.user.DTO.LoginUserDto;
 import net.ahmed.youshar.user.DTO.RegisterUserDto;
 import net.ahmed.youshar.user.entity.AppUser;
+import net.ahmed.youshar.user.entity.Student;
 import net.ahmed.youshar.user.entity.enume.Role;
+import net.ahmed.youshar.user.repository.StudentRepository;
 import net.ahmed.youshar.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,18 +31,18 @@ import java.util.UUID;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+    @Transactional
     public AppUser signup(RegisterUserDto input) {
         if (userRepository.findUserByEmailContainingIgnoreCase(input.email()).isPresent()) {
             throw new EmailAlreadyRegisteredException(input.email());
         }
-
-
 
         AppUser user = AppUser.builder()
                 .firstName(input.firstName())
@@ -52,7 +54,16 @@ public class AuthenticationService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return userRepository.save(user);
+        AppUser savedUser = userRepository.save(user);
+
+        Student student = Student.builder()
+                .user(savedUser)
+                .score(0)
+                .createdAt(LocalDateTime.now())
+                .build();
+        studentRepository.save(student);
+
+        return savedUser;
     }
 
     public AppUser authenticate(LoginUserDto input) {
