@@ -20,6 +20,8 @@ const MessagesPage = () => {
 
   const myStudentId = currentUser?.studentId;
 
+
+  
   useEffect(() => {
     const fetchInitialData = async () => {
       if (!myStudentId) return;
