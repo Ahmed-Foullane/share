@@ -53,12 +53,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Add `npm run lint` here once eslint passes (many react/prop-types errors today).
       - name: Build
         run: npm run build
 
-  # Requires repo secrets: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN (Docker Hub access token).
-  # Runs only on push (not on pull_request) so forks do not need secrets and we avoid failed logins.
   docker:
     name: Docker build & push
     runs-on: ubuntu-latest
