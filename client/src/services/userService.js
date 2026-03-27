@@ -15,6 +15,12 @@ const userService = {
     return response.data;
   },
 
+  /** App user id → student id (for messages, articles author id, etc.) */
+  getStudentIdForUser: async (userId) => {
+    const response = await api.get(`/users/${userId}/student`);
+    return response.data?.studentId ?? null;
+  },
+
   createUser: async (role, userData) => {
     const response = await api.post(`/users/${role}`, userData);
     return response.data;
