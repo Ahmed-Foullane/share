@@ -41,6 +41,7 @@ services:
       - mynetwork
 
   app:
+    image: foullane/youshare:api
     build:
       context: ./youShar
       dockerfile: Dockerfile
@@ -61,6 +62,7 @@ services:
       - mynetwork
 
   web:
+    image: foullane/youshare:web
     build:
       context: ./client
       dockerfile: Dockerfile
